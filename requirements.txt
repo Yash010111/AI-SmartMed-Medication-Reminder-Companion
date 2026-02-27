@@ -1,3 +1,0 @@
-pywhatkit
-requests
-PyPDF2
