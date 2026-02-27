@@ -36,10 +36,10 @@ python app.py
 
 ## 🖼 Screenshots
 
-### Home / Dashboard View
+### Add Medications View
 ![Home view](Assets/s1.jpg)
 
-### Medication Management Interface
+### Patient Management and Chat Bot Interface
 ![Medication Manager](Assets/s2.jpg)
 
 ---
