@@ -8,9 +8,9 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Twilio credentials (replace with your actual credentials)
-TWILIO_ACCOUNT_SID = "AC13de38b0e1a8336b150b08c04d1d12e5"
-TWILIO_AUTH_TOKEN = "33467cfdaa8a8e0c16053f5156feb10a"
-TWILIO_WHATSAPP_NUMBER = "whatsapp:+14155238886"  # Twilio sandbox WhatsApp number or your WhatsApp-enabled Twilio number
+TWILIO_ACCOUNT_SID = "###########"
+TWILIO_AUTH_TOKEN = "###########"
+TWILIO_WHATSAPP_NUMBER = "###########"  # Twilio sandbox WhatsApp number or your WhatsApp-enabled Twilio number
 
 client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
 
