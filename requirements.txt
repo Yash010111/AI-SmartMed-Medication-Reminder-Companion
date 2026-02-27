@@ -1,0 +1,5 @@
+bcrypt
+requests
+PyPDF2
+easyocr
+google-genai

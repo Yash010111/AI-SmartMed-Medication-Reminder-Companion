@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Desktop Alert - Medication Entry</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+  <style>
+    /* Container Styles */
+    body{
+      padding-top: 150px;
+    }
+    .container {
+      margin-top: 20px;
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 2rem;
+      background: #f0f4ff;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .form-group { margin-bottom: 1.5rem; }
+    label { display: block; margin-bottom: 0.5rem; font-weight: 500; color: #3a3f7a; }
+    input, select {
+      width: 80%; padding: 0.8rem; border: 1px solid #a3a9f8; border-radius: 4px; font-size: 1rem;
+    }
+    .submit-btn {
+      background-color: #5a5fff; color: white; padding: 1rem 2rem; border: none; border-radius: 4px;
+      cursor: pointer; font-size: 1rem; transition: background-color 0.3s;
+    }
+    .submit-btn:hover { background-color: #3f44d4; }
+    .medication-table { width: 100%; border-collapse: collapse; margin-top: 2rem; }
+    .medication-table th, .medication-table td {
+      padding: 12px; text-align: left; border-bottom: 1px solid #5a5fff;
+    }
+    .medication-table th { background-color: #c800ff; color: white; }
+    .medication-table tr { background-color: #f0f4ff; color: black; }
+    .add-more-btn {
+      background-color: #3f44d4; color: white; padding: 1rem 2rem; border: none; border-radius: 4px;
+      cursor: pointer; font-size: 0.8rem; transition: background-color 0.3s;
+    }
+    .medication-entry { border: 1px solid #ddd; padding: 1rem; margin-bottom: 1rem; border-radius: 4px; }
+    .remove-btn {
+      background-color: #d9534f; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px;
+      cursor: pointer;
+    }
+/* Popup Overlay - keep it full screen and centered */
+.popup-overlay {
+    position: fixed;
+    top: 0; 
+    left: 0;
+    width: 100%; 
+    height: 100%;
+    background: rgba(0,0,0,0.7); /* Darker transparent background */
+    display: none;
+    align-items: center; 
+    justify-content: center;
+    z-index: 10000;
+}
+
+/* Popup Box with New Animation and Layers */
+.popup {
+    position: relative;
+    height: 400px;
+    width: 400px;
+    max-width: 90%;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 5px 30px rgba(0,0,0,0.2);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 2rem;
+    animation: popupFadeIn 0.8s ease forwards;
+}
+
+/* Inner Layer Backgrounds (for animation) */
+.popup::before,
+.popup::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 400%;
+    height: 400%;
+    background: linear-gradient(45deg, #504bff, #4cfa63, #504bff, #4cfa63);
+    background-size: 200% 200%;
+    z-index: 0;
+    transform: translate(-50%, -50%) scale(0);
+    border-radius: 50%;
+    transition: transform 0.6s ease;
+}
+
+.popup::after {
+    background: linear-gradient(45deg, #6665ff, #69fa7f, #6665ff, #69fa7f);
+    transition-delay: 0.2s;
+}
+
+/* Show animation when popup is visible */
+.popup-overlay.show .popup::before {
+    transform: translate(-50%, -50%) scale(1.5);
+}
+
+.popup-overlay.show .popup::after {
+    transform: translate(-50%, -50%) scale(1.2);
+}
+
+/* Popup Content */
+.popup p {
+    position: relative;
+    z-index: 1;
+    font-size: 1.2rem;
+    color: #333;
+    margin-bottom: 1.5rem;
+}
+
+.popup button {
+    position: relative;
+    z-index: 1;
+    padding: 0.8rem 1.5rem;
+    background: linear-gradient(to right, #504bff, #4cfa63);
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.popup button:hover {
+    background: linear-gradient(to right, #4cfa63, #504bff);
+}
+ 
+#uploadForm{
+  color:#0099ff;
+ 
+}
+/* Fade In Keyframes */
+@keyframes popupFadeIn {
+    from { transform: translateY(-50px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+</style>
+</head>
+<body>
+  <script src="https://cdn.botpress.cloud/webchat/v2.3/inject.js"></script>
+  <script src="https://files.bpcontent.cloud/2025/04/24/04/20250424043252-TEG4TPNB.js"></script>
+<header>
+    <div class="logo">
+      <img src="https://cdn.dribbble.com/userupload/25331814/file/original-a7c9a769d1a031a085cc572b2ab75459.png?resize=752x588&vertical=center" alt="Icon" style="width: 100px; height: 100px; object-fit: cover; border-radius: 10px;">
+    </div>
+    <nav>
+            <ul>
+                <li><a href="/">Home</a></li>
+                
+                <li><a href="/dextop_alert">Alerts</a></li>
+                <li><a href="/profile">Profile</a></li>
+            </ul>
+    </nav>
+</header>
+
+<!-- Popup Overlay -->
+<div class="popup-overlay" id="popupOverlay">
+    <div class="popup">
+      <p id="popupMessage"></p>
+      <button id="popupCloseBtn">OK</button>
+    </div>
+</div>
+
+<div class="container">
+    <h2 id="tag">Add Medication Reminders</h2>
+    <form id="medicationForm" method="POST" action="/add_medication">
+      <div id="entries-container">
+        <div class="medication-entry">
+          <div class="form-group">
+            <label for="medication">Medicine Name:</label>
+            <input type="text" name="medication" required />
+          </div>
+          <div class="form-group">
+            <label for="dosage">Dosage:</label>
+            <input type="text" name="dosage" required />
+          </div>
+          <div class="form-group">
+            <label for="time">Time:</label>
+            <input type="time" name="time" required />
+          </div>
+        </div>
+      </div>
+      <button type="button" class="add-more-btn" id="addMoreBtn">+ Add Another Medication</button>
+      <button type="submit" class="submit-btn">Save All Reminders</button>
+    </form>
+
+    <hr>
+
+    <h2 id="tag">Upload Prescription Image</h2>
+    <form id="uploadForm" enctype="multipart/form-data" method="post" action="/upload_prescription">
+      <div class="form-group">
+        <label for="file">Select Prescription Image:</label>
+        <input type="file" name="file" id="file" accept="image/*" required />
+      </div>
+      <button type="submit" class="submit-btn">Upload and Process</button>
+    </form>
+
+    <div id="uploadStatus"></div>
+
+    <h2 id="tag">Your Upcoming Reminders</h2>
+    <table class="medication-table">
+      <thead>
+        <tr>
+          <th>Medicine</th><th>Dosage</th><th>Time</th><th>Status</th><th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="medicationsTableBody">
+        {% if medications %}
+          {% for med in medications %}
+          <tr>
+            <td>{{ med.medicine }}</td>
+            <td>{{ med.dosage }}</td>
+            <td>{{ med.time }}</td>
+            <td>{{ med.status }}</td>
+            <td>
+              <form method="POST" action="/delete_medication" onsubmit="return confirm('Are you sure?');">
+                <input type="hidden" name="medicine" value="{{ med.medicine }}">
+                <input type="hidden" name="dosage" value="{{ med.dosage }}">
+                <input type="hidden" name="time" value="{{ med.time }}">
+                <button type="submit" class="remove-btn">Delete</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        {% else %}
+          <tr><td colspan="5">No upcoming reminders</td></tr>
+        {% endif %}
+      </tbody>
+    </table>
+</div>
+
+<audio id="alert-sound" src="{{ url_for('static', filename='notification.mp3') }}" preload="auto"></audio>
+
+<script>
+document.getElementById('popupCloseBtn').addEventListener('click', function() {
+    document.getElementById('popupOverlay').classList.remove('show');
+    document.getElementById('popupOverlay').style.display = 'none';
+});
+
+function showPopup(message) { // <-- renamed this properly
+    document.getElementById('popupMessage').textContent = message;
+    document.getElementById('popupOverlay').style.display = 'flex';
+    setTimeout(() => {
+        document.getElementById('popupOverlay').classList.add('show');
+    }, 50);
+}
+
+// Add entry logic
+document.getElementById('addMoreBtn').addEventListener('click', () => {
+    const container = document.getElementById('entries-container');
+    const newEntry = document.createElement('div');
+    newEntry.className = 'medication-entry';
+    newEntry.innerHTML = `
+      <div class="form-group"><label>Medicine Name:</label><input type="text" name="medication" required /></div>
+      <div class="form-group"><label>Dosage:</label><input type="text" name="dosage" required /></div>
+      <div class="form-group"><label>Time:</label><input type="time" name="time" required /></div>
+      <button type="button" class="remove-btn" onclick="this.parentNode.remove()">Remove</button>
+    `;
+    container.appendChild(newEntry);
+});
+
+// Form validation
+document.getElementById('medicationForm').addEventListener('submit', function(e) {
+    const entries = document.querySelectorAll('.medication-entry');
+    if (entries.length === 0) {
+        e.preventDefault();
+        showPopup('⚠️ Please add at least one medication');
+    }
+});
+
+// Upload logic
+document.getElementById('uploadForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const fileInput = document.getElementById('file');
+    if (!fileInput.files.length) {
+        showPopup('📄 Please select a PDF file to upload.');
+        return;
+    }
+    const formData = new FormData();
+    formData.append('file', fileInput.files[0]);
+    fetch('/upload_prescription', { method: 'POST', body: formData })
+      .then(res => res.json())
+      .then(data => {
+        if (data.status?.success) {
+            showPopup('✅ Prescription processed successfully.');
+            updateMedicationTable(data.data?.medications || data.medications || []);
+        } else {
+            showPopup('❌ Error processing prescription.');
+        }
+      })
+      .catch(() => showPopup('❌ Upload failed.'));
+});
+
+// Update table
+function updateMedicationTable(medications) {
+    const tbody = document.getElementById('medicationsTableBody');
+    tbody.innerHTML = '';
+    if (!medications.length) {
+        tbody.innerHTML = '<tr><td colspan="5">No upcoming reminders</td></tr>';
+        return;
+    }
+    medications.forEach(med => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${med.medicine}</td>
+          <td>${med.dosage}</td>
+          <td>${med.time}</td>
+          <td>${med.status || 'Scheduled'}</td>
+          <td>
+            <form method="POST" action="/delete_medication" onsubmit="return confirm('Are you sure?');">
+              <input type="hidden" name="medicine" value="${med.medicine}">
+              <input type="hidden" name="dosage" value="${med.dosage}">
+              <input type="hidden" name="time" value="${med.time}">
+              <button type="submit" class="remove-btn">Delete</button>
+            </form>
+          </td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
+// Alert sound
+function playAlertSound() {
+    document.getElementById('alert-sound').play().catch(() => {});
+}
+
+// Desktop Notification fallback
+function showPopupOrNotification(msg) {
+    if (Notification.permission === 'granted') {
+        new Notification('Medication Reminder', { body: msg });
+    } else {
+        showPopup(msg);
+    }
+}
+
+// Check reminders
+// function checkMedicationAlerts() {
+//     const now = new Date();
+//     const current = now.toTimeString().slice(0,5);
+//     document.querySelectorAll('#medicationsTableBody tr').forEach(row => {
+//         const timeCell = row.cells[2]?.innerText;
+//         const statusCell = row.cells[3];
+//         if (timeCell === current && statusCell.innerText !== 'Notified') {
+//             playAlertSound();
+//             showPopupOrNotification(`💊 Time to take: ${row.cells[0].innerText} (${row.cells[1].innerText})`);
+//             statusCell.innerText = 'Notified';
+//         }
+//     });
+// }
+
+// // Request notification permission
+// if (Notification.permission !== 'granted') Notification.requestPermission();
+
+// setInterval(checkMedicationAlerts, 6000);
+// checkMedicationAlerts();
+</script>
+<footer class="footer">
+        
+  <script src="https://cdn.botpress.cloud/webchat/v2.5/inject.js"></script>
+  <script src="https://files.bpcontent.cloud/2025/05/06/14/20250506145721-84YDOBW9.js"></script>
+      
+      <div class="footer-section">
+          <img src="https://cdn.dribbble.com/userupload/25331814/file/original-a7c9a769d1a031a085cc572b2ab75459.png?resize=752x588&vertical=center" style="width: 100px; height: 100px; object-fit: cover; border-radius: 10px;" alt="LogNexus Logo" class="footer-logo">
+          <p>Manage your medications effectively and stay healthy with timely reminders.</p>
+      </div>
+      <div class="footer-section">
+          <h3>Services</h3>
+          <ul>
+              <li><a href="#">Features</a></li>
+              <li><a href="#">Support</a></li>
+              <li><a href="#">Get Help</a></li>
+          </ul>
+      </div>
+      <div class="footer-section">
+          <h3>Contact Us</h3>
+          <p>Email: aimedicinehelper@gmail.com</p>
+      </div>
+  </footer>
+</body>
+</html>

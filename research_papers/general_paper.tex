@@ -1,0 +1,109 @@
+\documentclass[12pt]{article}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{hyperref}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{geometry}
+\geometry{margin=1in}
+
+\title{Development of a Smart Medication Reminder Application with AI-Based Prescription Processing}
+\author{Author Name \\
+Institution \\
+Email: author@example.com}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Medication adherence remains a critical issue in healthcare, affecting treatment efficacy and patient well-being. This paper presents the development of a smart medication reminder application that leverages Optical Character Recognition (OCR) and artificial intelligence (AI) to automate prescription processing and deliver timely reminders via WhatsApp. The application integrates EasyOCR for text extraction and the Google Gemini API for transforming unstructured prescription text into structured medication schedules. The reminder system utilizes automated WhatsApp messaging to notify users. This paper details the methodology, system design, implementation, and evaluation of the application.
+\end{abstract}
+
+\section{Introduction}
+Effective medication management is essential for patient health, yet many individuals face challenges in adhering to prescribed regimens. Traditional reminder methods often lack automation and integration with prescription data. This work aims to develop a smart application that automates prescription interpretation and provides timely reminders to improve adherence.
+
+\section{Methodology}
+The application employs a multi-stage process involving OCR extraction, AI-based text transformation, and reminder scheduling.
+
+\subsection{OCR Extraction}
+Using EasyOCR, the system extracts text from prescription images. The OCR reader is initialized with English language support, and text lines are concatenated into a raw text block.
+
+\begin{algorithm}
+\caption{Prescription Text Extraction}
+\begin{algorithmic}[1]
+\State Initialize EasyOCR reader
+\State Input prescription image
+\State Extract text lines from image
+\State Concatenate lines into raw text
+\State Output raw prescription text
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{AI Text Transformation}
+The raw text is transformed into a structured JSON format using the Google Gemini API. A prompt guides the AI to format medication names, dosages, and timings appropriately.
+
+\begin{algorithm}
+\caption{Text Transformation Using Google Gemini API}
+\begin{algorithmic}[1]
+\State Define prompt for JSON formatting
+\State Input raw text and prompt to API
+\State Receive structured JSON response
+\State Parse JSON for medication details
+\State Output structured medication schedule
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Reminder System}
+The reminder system schedules WhatsApp messages using pywhatkit. Messages include medication details and are sent at specified times.
+
+\begin{algorithm}
+\caption{WhatsApp Reminder Scheduling}
+\begin{algorithmic}[1]
+\State Input medication details and times
+\For{each medication and time}
+    \State Validate and adjust time
+    \State Format reminder message
+    \State Schedule WhatsApp message
+\EndFor
+\end{algorithmic}
+\end{algorithm}
+
+\section{System Design}
+The application is built as a Flask web app with modules for user management, prescription processing, and reminders. SQLite is used for data storage. Figure~\ref{fig:system_diagram} illustrates the system architecture.
+
+\begin{figure}[htbp]
+\centerline{\includegraphics[width=0.6\textwidth]{../medication_reminder_diagram.png}}
+\caption{System Architecture Diagram}
+\label{fig:system_diagram}
+\end{figure}
+
+\section{Implementation}
+Key modules include:
+\begin{itemize}
+    \item \textbf{OCR Module:} Implements EasyOCR for text extraction.
+    \item \textbf{AI Module:} Interfaces with Google Gemini API for text transformation.
+    \item \textbf{Reminder Module:} Uses pywhatkit to send WhatsApp reminders.
+\end{itemize}
+
+Figure~\ref{fig:workflow_diagram} shows the medication reminder workflow.
+
+\begin{figure}[htbp]
+\centerline{\includegraphics[width=0.6\textwidth]{../medication_reminder_workflow_diagram.png}}
+\caption{Medication Reminder Workflow Diagram}
+\label{fig:workflow_diagram}
+\end{figure}
+
+\section{Evaluation}
+The system automates medication management, reducing manual effort and improving adherence potential. Limitations include OCR accuracy dependency and WhatsApp platform reliance.
+
+\section{Conclusion and Future Work}
+This paper presented a smart medication reminder application integrating OCR and AI for prescription processing and WhatsApp reminders. Future work includes expanding messaging platforms and conducting user studies.
+
+\section*{References}
+% Add references here
+
+\end{document}

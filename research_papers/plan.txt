@@ -1,0 +1,49 @@
+Information Gathered:
+- The project is a Flask-based medication reminder system with user authentication, profile management, prescription image OCR extraction, AI-based text transformation, and WhatsApp medication reminders.
+- OCR extraction uses EasyOCR and Google Gemini API for transforming prescription text into structured JSON.
+- Medication reminders are sent via WhatsApp using pywhatkit with formatted messages and scheduled times.
+- System and workflow diagrams are available as medication_reminder_diagram.png and medication_reminder_workflow_diagram.png.
+- The project uses SQLite for data storage and has a modular structure.
+
+Plan for Research Papers:
+
+1. IEEE Format Paper:
+- Title: AI-Enabled Medication Reminder System Using OCR and WhatsApp Integration
+- Abstract: Summary of the system, objectives, and key contributions.
+- Keywords: Medication reminder, OCR, AI, WhatsApp, Flask, EasyOCR, Google Gemini API.
+- Introduction: Background, motivation, and problem statement.
+- Related Work: Brief overview of existing medication reminder systems and OCR techniques.
+- System Architecture: Description of the Flask app, database, and modules.
+- OCR and AI Techniques: Details on EasyOCR usage and Google Gemini API transformation.
+- Medication Reminder System: WhatsApp reminder logic and scheduling.
+- Diagrams: Include medication_reminder_diagram.png and medication_reminder_workflow_diagram.png.
+- Results and Discussion: Benefits, limitations, and potential improvements.
+- Conclusion: Summary and future work.
+- References: Relevant citations.
+
+2. General Research Paper Format:
+- Title: Development of a Smart Medication Reminder Application with AI-Based Prescription Processing
+- Abstract: Overview of the application and its features.
+- Introduction: Context and objectives.
+- Methodology:
+  - OCR Extraction: EasyOCR and text extraction process.
+  - AI Text Transformation: Google Gemini API usage.
+  - Reminder System: WhatsApp reminders and scheduling.
+- System Design: Architecture and database schema.
+- Implementation: Key modules and code snippets.
+- Diagrams: Include system and workflow diagrams.
+- Evaluation: Discussion on system performance and user benefits.
+- Conclusion and Future Work.
+- References.
+
+Dependent Files to be Created:
+- research_papers/ieee_paper.tex
+- research_papers/general_paper.tex
+
+Follow-up Steps:
+- Create the LaTeX files as per the plan.
+- Include diagrams by referencing the image files.
+- Compile and test the LaTeX documents.
+- Provide the final PDFs or LaTeX source to the user.
+
+Please confirm if you approve this plan or want any modifications.

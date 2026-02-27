@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medication Reminder Setter</title>
+    <link rel="stylesheet" href="styles3.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #0d0221;
+            color: white;
+            text-align: center;
+        }
+        .container {
+            padding: 20px;
+        }
+        h1 {
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin: 10px 0;
+        }
+        .form-group input, .form-group select {
+            padding: 10px;
+            width: 300px;
+        }
+        .submit-button {
+            padding: 10px 20px;
+            background-color: #6a1bb8;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .submit-button:hover {
+            background-color: #5a0da8;
+        }
+        .table {
+            margin-top: 20px;
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .table th, .table td {
+            border: 1px solid #fff;
+            padding: 10px;
+        }
+        .status-pending {
+            color: #FFA500;
+        }
+        .status-confirmed {
+            color: #4CAF50;
+        }
+        .status-failed {
+            color: #F44336;
+        }
+        .delete-btn {
+            padding: 5px 10px;
+            background-color: #F44336;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .delete-btn:hover {
+            background-color: #D32F2F;
+        }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Set Your Medication Reminder</h1>
+        <div class="form-group">
+            <input type="text" id="phone-number" placeholder="WhatsApp Number (with country code)" required>
+        </div>
+        <div class="form-group">
+            <input type="file" id="pdf-upload" accept=".pdf">
+            <button class="submit-button" onclick="uploadPDF()">Upload Prescription</button>
+        </div>
+        <div class="form-group">
+            <h2>Add Medication Manually</h2>
+            <input type="text" id="manual-medication" placeholder="Medication Name" required>
+            <input type="text" id="manual-dosage" placeholder="Dosage" required>
+            <input type="text" id="manual-time" placeholder="Time (HH:MM)" required>
+            <button class="submit-button" onclick="addManualMedication()">Add Medication</button>
+        </div>
+        <div class="form-group">
+            <h2>Current Medications</h2>
+            <table class="table" id="medications-table">
+                <thead>
+                    <tr>
+                        <th>Medication</th>
+                        <th>Dosage</th>
+                        <th>Frequency</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        <div class="form-group">
+            <h2>Your Medication Schedule</h2>
+            <table class="table" id="reminders-table">
+                <thead>
+                    <tr>
+                        <th>Medication</th>
+                        <th>Time</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+    <script>
+        function showReminders(data) {
+            const medicationsTable = document.getElementById('medications-table').getElementsByTagName('tbody')[0];
+            const remindersTable = document.getElementById('reminders-table').getElementsByTagName('tbody')[0];
+
+            medicationsTable.innerHTML = '';
+            remindersTable.innerHTML = '';
+
+            // Display all medications (both manual and extracted)
+            data.schedule.forEach(med => {
+                const parts = med.split('----');
+                if (parts.length === 3) {
+                    // Add to medications table
+                    const medRow = medicationsTable.insertRow();
+                    medRow.insertCell(0).innerText = parts[0]; // Medication
+                    medRow.insertCell(1).innerText = parts[1]; // Dosage
+                    medRow.insertCell(2).innerText = "Daily at " + parts[2]; // Time
+                    medRow.insertCell(3).innerHTML = '<span class="status-confirmed">Confirmed</span>';
+                    medRow.insertCell(4).innerHTML = '<button class="delete-btn" onclick="deleteMedication(this)">Delete</button>';
+                    
+                    // Add to schedule table
+                    const scheduleRow = remindersTable.insertRow();
+                    scheduleRow.insertCell(0).innerText = parts[0];
+                    scheduleRow.insertCell(1).innerText = parts[2];
+                }
+            });
+        }
+    </script>
+    <script>
+        function uploadPDF() {
+            const phoneNumber = document.getElementById('phone-number').value;
+            const fileInput = document.getElementById('pdf-upload');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                alert("Please select a PDF file.");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('phone_number', phoneNumber);
+            formData.append('file', file);
+
+            fetch('/upload_prescription', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log("API Response:", data);
+                if (data.success) {
+                    // Clear tables first
+                    document.getElementById('medications-table').getElementsByTagName('tbody')[0].innerHTML = '';
+                    document.getElementById('reminders-table').getElementsByTagName('tbody')[0].innerHTML = '';
+                    
+                    // Process all medications (extracted + manual)
+                    const allMedications = (data.extractedMedications || []).concat(data.schedule || []);
+                    if (allMedications.length > 0) {
+                        showReminders({ schedule: allMedications });
+                    }
+                } else {
+                    alert("Error: " + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("Failed to upload prescription. Please try again.");
+            });
+        }
+
+        function addManualMedication() {
+            const medication = document.getElementById('manual-medication').value;
+            const dosage = document.getElementById('manual-dosage').value;
+            const time = document.getElementById('manual-time').value;
+            const phoneNumber = document.getElementById('phone-number').value;
+
+            if (!medication || !dosage || !time || !phoneNumber) {
+                alert("Please fill in all fields including WhatsApp number.");
+                return;
+            }
+
+            const medicationsTable = document.getElementById('medications-table').getElementsByTagName('tbody')[0];
+            const row = medicationsTable.insertRow();
+            
+            // Add medication details
+            row.insertCell(0).innerText = medication;
+            row.insertCell(1).innerText = dosage;
+            row.insertCell(2).innerText = "Daily at " + time;
+            row.insertCell(3).innerHTML = '<div class="loading"></div>';
+            
+            // Add delete button
+            const actionCell = row.insertCell(4);
+            actionCell.innerHTML = '<button class="delete-btn" onclick="deleteMedication(this)">Delete</button>';
+
+            // Schedule WhatsApp reminder
+            fetch('/schedule_reminder', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    phone_number: phoneNumber,
+                    medication: medication,
+                    dosage: dosage,
+                    time: time
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update status to confirmed
+                    row.cells[3].innerHTML = '<span class="status-confirmed">Confirmed</span>';
+                    
+                    // Add to schedule table
+                    const scheduleTable = document.getElementById('reminders-table').getElementsByTagName('tbody')[0];
+                    const scheduleRow = scheduleTable.insertRow();
+                    scheduleRow.insertCell(0).innerText = medication;
+                    scheduleRow.insertCell(1).innerText = time;
+                } else {
+                    row.cells[3].innerHTML = '<span class="status-failed">Failed</span>';
+                    alert("Error scheduling reminder: " + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                row.cells[3].innerHTML = '<span class="status-failed">Failed</span>';
+            });
+
+            // Clear input fields
+            document.getElementById('manual-medication').value = '';
+            document.getElementById('manual-dosage').value = '';
+            document.getElementById('manual-time').value = '';
+        }
+
+        function deleteMedication(button) {
+            const row = button.parentNode.parentNode;
+            row.parentNode.removeChild(row);
+            // TODO: Implement API call to cancel reminder
+        }
+    </script>
+</body>
+</html>
