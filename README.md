@@ -32,17 +32,15 @@ cd code
 python app.py
 ```
 
-Open: http://127.0.0.1:5000
 
----
 
 ## 🖼 Screenshots
 
 ### Home / Dashboard View
-![Home view](assets/s1.jpg)
+![Home view](Assets/s1.jpg)
 
 ### Medication Management Interface
-![Medication Manager](assets/s2.jpg)
+![Medication Manager](Assets/s2.jpg)
 
 ---
 
